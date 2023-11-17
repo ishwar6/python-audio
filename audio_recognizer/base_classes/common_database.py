@@ -4,11 +4,11 @@ from typing import Dict, List, Tuple
 from audio_recognizer.base_classes.base_database import BaseDatabase
 
 
-class CommonDatabase(BaseDatabase, metaclass=abc.ABCMeta):
-    # Since several methods across different databases are actually just the same
-    # I've built this class with the idea to reuse that logic instead of copy pasting
-    # over and over the same code.
-
+class CommonDatabase(BaseDatabase, metaclass=abc.ABCMeta): 
+    """
+     Since several methods across different databases are actually just the same
+     over and over the same code.
+    """
     def __init__(self):
         super().__init__()
 
@@ -185,7 +185,6 @@ class CommonDatabase(BaseDatabase, metaclass=abc.ABCMeta):
             - song id: Song identifier
             - offset_difference: (database_offset - sampled_offset)
         """
-        # Create a dictionary of hash => offset pairs for later lookups
         mapper = {}
         for hsh, offset in hashes:
             if hsh.upper() in mapper.keys():
@@ -201,7 +200,10 @@ class CommonDatabase(BaseDatabase, metaclass=abc.ABCMeta):
         results = []
         with self.cursor() as cur:
             for index in range(0, len(values), batch_size):
-                # Create our IN part of the query
+
+                """
+                Create our IN part of the query
+                """
                 query = self.SELECT_MULTIPLE % ', '.join([self.IN_MATCH] * len(values[index: index + batch_size]))
 
                 cur.execute(query, values[index: index + batch_size])
@@ -226,7 +228,9 @@ class CommonDatabase(BaseDatabase, metaclass=abc.ABCMeta):
         """
         with self.cursor() as cur:
             for index in range(0, len(song_ids), batch_size):
-                # Create our IN part of the query
+                """
+                Create our IN part of the query
+                """
                 query = self.DELETE_SONGS % ', '.join(['%s'] * len(song_ids[index: index + batch_size]))
 
                 cur.execute(query, song_ids[index: index + batch_size])

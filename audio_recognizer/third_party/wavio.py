@@ -1,8 +1,4 @@
-# wavio.py
-# Author: Warren Weckesser
-# License: BSD 2-Clause (http://opensource.org/licenses/BSD-2-Clause)
-# Synopsis: A Python module for reading and writing 24 bit WAV files.
-# Github: github.com/WarrenWeckesser/wavio
+
 
 """
 The wavio module defines the functions:
@@ -89,8 +85,6 @@ def _array2wav(a, sampwidth):
         a8 = (a.reshape(a.shape + (1,)) >> _np.array([0, 8, 16])) & 255
         wavdata = a8.astype(_np.uint8).tostring()
     else:
-        # Make sure the array is little-endian, and then convert using
-        # tostring()
         a = a.astype('<' + a.dtype.str[1:], copy=False)
         wavdata = a.tostring()
     return wavdata
@@ -176,8 +170,6 @@ _sampwidth_ranges = {1: (0, 256),
 
 
 def _scale_to_sampwidth(data, sampwidth, vmin, vmax):
-    # Scale and translate the values to fit the range of the data type
-    # associated with the given sampwidth.
 
     data = data.clip(vmin, vmax)
 
@@ -314,8 +306,6 @@ def write(file, data, rate, scale=None, sampwidth=None):
         elif sampwidth == 4 and data.dtype == _np.uint32:
             data = (data.astype(_np.int64) - 2**31).astype(_np.int32)
         elif data.itemsize != sampwidth:
-            # Integer input, but rescaling is needed to adjust the
-            # input range to the output sample width.
             ii = _np.iinfo(data.dtype)
             vmin = ii.min
             vmax = ii.max
@@ -325,7 +315,6 @@ def write(file, data, rate, scale=None, sampwidth=None):
             vmin = data.min()
             vmax = data.max()
         else:
-            # scale must be a tuple of the form (vmin, vmax)
             vmin, vmax = scale
             if vmin is None:
                 vmin = data.min()
@@ -333,16 +322,19 @@ def write(file, data, rate, scale=None, sampwidth=None):
                 vmax = data.max()
 
         data = _scale_to_sampwidth(data, sampwidth, vmin, vmax)
+    """
+    At this point, `data` has been converted to have one of the following:
+    sampwidth   dtype
+        ---------   -----
+            1       uint8
+            2       int16
+            3       int32
+            4       int32
+    The values in `data` are in the form in which they will be saved;
+    no more scaling will take place.
 
-    # At this point, `data` has been converted to have one of the following:
-    #    sampwidth   dtype
-    #    ---------   -----
-    #        1       uint8
-    #        2       int16
-    #        3       int32
-    #        4       int32
-    # The values in `data` are in the form in which they will be saved;
-    # no more scaling will take place.
+    """
+
 
     if data.ndim == 1:
         data = data.reshape(-1, 1)

@@ -22,14 +22,15 @@ class AudioRecognizer:
     def __init__(self, config):
         self.config = config
 
-        # initialize db
         db_cls = get_database(config.get("database_type", "mysql").lower())
 
         self.db = db_cls(**config.get("database", {}))
         self.db.setup()
-
-        # if we should limit seconds fingerprinted,
-        # None|-1 means use entire track
+        """
+        if we should limit seconds fingerprinted,
+        None|-1 means use entire track
+        """
+       
         self.limit = self.config.get("fingerprint_limit", None)
         if self.limit == -1:  # for JSON compatibility
             self.limit = None
@@ -40,7 +41,6 @@ class AudioRecognizer:
         Keeps a dictionary with the hashes of the fingerprinted songs, in that way is possible to check
         whether or not an audio file was already processed.
         """
-        # get songs previously indexed
         self.songs = self.db.get_songs()
         self.songhashes_set = set()  # to know which ones we've computed before
         for song in self.songs:
@@ -71,7 +71,6 @@ class AudioRecognizer:
         :param extensions: list of file extensions to consider.
         :param nprocesses: amount of processes to fingerprint the files within the directory.
         """
-        # Try to use the maximum amount of processes if not given.
         try:
             nprocesses = nprocesses or multiprocessing.cpu_count()
         except NotImplementedError:
@@ -83,20 +82,16 @@ class AudioRecognizer:
 
         filenames_to_fingerprint = []
         for filename, _ in decoder.find_files(path, extensions):
-            # don't refingerprint already fingerprinted files
             if decoder.unique_hash(filename) in self.songhashes_set:
                 print(f"{filename} already fingerprinted, continuing...")
                 continue
 
             filenames_to_fingerprint.append(filename)
 
-        # Prepare _fingerprint_worker input
         worker_input = list(zip(filenames_to_fingerprint, [self.limit] * len(filenames_to_fingerprint)))
 
-        # Send off our tasks
         iterator = pool.imap_unordered(AudioRecognizer._fingerprint_worker, worker_input)
 
-        # Loop till we have all of them
         while True:
             try:
                 song_name, hashes, file_hash = next(iterator)
@@ -106,7 +101,6 @@ class AudioRecognizer:
                 break
             except Exception:
                 print("Failed fingerprinting")
-                # Print traceback because we can't reraise it here
                 traceback.print_exc(file=sys.stdout)
             else:
                 sid = self.db.insert_song(song_name, file_hash, len(hashes))
@@ -129,7 +123,6 @@ class AudioRecognizer:
         song_name_from_path = decoder.get_audio_name_from_path(file_path)
         song_hash = decoder.unique_hash(file_path)
         song_name = song_name or song_name_from_path
-        # don't refingerprint already fingerprinted files
         if song_hash in self.songhashes_set:
             print(f"{song_name} already fingerprinted, continuing...")
         else:
@@ -185,7 +178,6 @@ class AudioRecognizer:
         :param topn: number of results being returned back.
         :return: a list of dictionaries (based on topn) with match information.
         """
-        # count offset occurrences per song and keep only the maximum ones.
         sorted_matches = sorted(matches, key=lambda m: (m[0], m[1]))
         counts = [(*key, len(list(group))) for key, group in groupby(sorted_matches, key=lambda m: (m[0], m[1]))]
         songs_matches = sorted(
@@ -208,9 +200,7 @@ class AudioRecognizer:
                 INPUT_HASHES: queried_hashes,
                 FINGERPRINTED_HASHES: song_hashes,
                 HASHES_MATCHED: hashes_matched,
-                # Percentage regarding hashes matched vs hashes from the input.
                 INPUT_CONFIDENCE: round(hashes_matched / queried_hashes, 2),
-                # Percentage regarding hashes matched vs hashes fingerprinted in the db.
                 FINGERPRINTED_CONFIDENCE: round(hashes_matched / song_hashes, 2),
                 OFFSET: offset,
                 OFFSET_SECS: nseconds,
@@ -227,8 +217,10 @@ class AudioRecognizer:
 
     @staticmethod
     def _fingerprint_worker(arguments):
-        # Pool.imap sends arguments as tuples so we have to unpack
-        # them ourself.
+        """
+        Pool.imap sends arguments as tuples so we have to unpack
+        them ourself.
+        """
         try:
             file_name, limit = arguments
         except ValueError:

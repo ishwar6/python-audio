@@ -14,12 +14,14 @@ class BaseRecognizer(object, metaclass=abc.ABCMeta):
 
     def _recognize(self, *data) -> Tuple[List[Dict[str, any]], int, int, int]:
         fingerprint_times = []
-        hashes = set()  # to remove possible duplicated fingerprints we built a set.
+        hashes = set() 
+        """
+            to remove possible duplicated fingerprints we built a set.
+        """
         for channel in data:
             fingerprints, fingerprint_time = self.audio_recognizer.generate_fingerprints(channel, Fs=self.Fs)
             fingerprint_times.append(fingerprint_time)
             hashes |= set(fingerprints)
-
         matches, dedup_hashes, query_time = self.audio_recognizer.find_matches(hashes)
 
         t = time()
@@ -30,4 +32,8 @@ class BaseRecognizer(object, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def recognize(self) -> Dict[str, any]:
-        pass  # base class does nothing
+        """
+        base class does nothing
+        """
+        pass 
+

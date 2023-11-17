@@ -61,25 +61,29 @@ def get_2D_peaks(arr2D: np.array, plot: bool = False, amp_min: int = DEFAULT_AMP
     :param plot: for plotting the results.
     :param amp_min: minimum amplitude in spectrogram in order to be considered a peak.
     :return: a list composed by a list of frequencies and times.
-    """
-    # Original code from the repo is using a morphology mask that does not consider diagonal elements
-    # as neighbors (basically a diamond figure) and then applies a dilation over it, so what I'm proposing
-    # is to change from the current diamond figure to a just a normal square one:
-    #       F   T   F           T   T   T
-    #       T   T   T   ==>     T   T   T
-    #       F   T   F           T   T   T
-    # In my local tests time performance of the square mask was ~3 times faster
-    # respect to the diamond one, without hurting accuracy of the predictions.
-    # I've made now the mask shape configurable in order to allow both ways of find maximum peaks.
-    # That being said, we generate the mask by using the following function
-    # https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.generate_binary_structure.html
-    struct = generate_binary_structure(2, CONNECTIVITY_MASK)
 
-    #  And then we apply dilation using the following function
-    #  http://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.iterate_structure.html
-    #  Take into account that if PEAK_NEIGHBORHOOD_SIZE is 2 you can avoid the use of the scipy functions and just
-    #  change it by the following code:
-    #  neighborhood = np.ones((PEAK_NEIGHBORHOOD_SIZE * 2 + 1, PEAK_NEIGHBORHOOD_SIZE * 2 + 1), dtype=bool)
+    Original code from the repo is using a morphology mask that does not consider diagonal elements
+    as neighbors (basically a diamond figure) and then applies a dilation over it, so what I'm proposing
+    is to change from the current diamond figure to a just a normal square one:
+           F   T   F           T   T   T
+           T   T   T   ==>     T   T   T
+           F   T   F           T   T   T
+    In my local tests time performance of the square mask was ~3 times faster
+    respect to the diamond one, without hurting accuracy of the predictions.
+    I've made now the mask shape configurable in order to allow both ways of find maximum peaks.
+    That being said, we generate the mask by using the following function
+    https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.generate_binary_structure.html
+    """
+
+    struct = generate_binary_structure(2, CONNECTIVITY_MASK)
+    """
+    And then we apply dilation using the following function
+    http://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.iterate_structure.html
+    Take into account that if PEAK_NEIGHBORHOOD_SIZE is 2 you can avoid the use of the scipy functions and just
+    change it by the following code:
+    neighborhood = np.ones((PEAK_NEIGHBORHOOD_SIZE * 2 + 1, PEAK_NEIGHBORHOOD_SIZE * 2 + 1), dtype=bool)
+    """
+
     neighborhood = iterate_structure(struct, PEAK_NEIGHBORHOOD_SIZE)
 
     # find local maxima using our filter mask
@@ -89,24 +93,20 @@ def get_2D_peaks(arr2D: np.array, plot: bool = False, amp_min: int = DEFAULT_AMP
     background = (arr2D == 0)
     eroded_background = binary_erosion(background, structure=neighborhood, border_value=1)
 
-    # Boolean mask of arr2D with True at peaks (applying XOR on both matrices).
     detected_peaks = local_max != eroded_background
 
-    # extract peaks
     amps = arr2D[detected_peaks]
     freqs, times = np.where(detected_peaks)
 
     # filter peaks
     amps = amps.flatten()
 
-    # get indices for frequency and time
     filter_idxs = np.where(amps > amp_min)
 
     freqs_filter = freqs[filter_idxs]
     times_filter = times[filter_idxs]
 
     if plot:
-        # scatter of the peaks
         fig, ax = plt.subplots()
         ax.imshow(arr2D)
         ax.scatter(times_filter, freqs_filter)

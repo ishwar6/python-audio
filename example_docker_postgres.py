@@ -6,7 +6,7 @@ from audio_recognizer.logic.recognizer.microphone_recognizer import MicrophoneRe
 
 
 
-# UPDATED DATABASE CONFIGURATION
+# DATABASE CONFIGURATION
 config = {
     "database": {
         "host": "localhost",
@@ -18,7 +18,6 @@ config = {
 }
 
 
-
 if __name__ == '__main__':
 
     # create a AudioRecognizer instance
@@ -27,12 +26,8 @@ if __name__ == '__main__':
     # Fingerprint all the mp3's in the directory we give it
     arc.fingerprint_directory("test", [".wav",".mp3"])
 
-    # important
-    # 1
-    # Recognize audio from a file
     results = arc.recognize(FileRecognizer, "mp3/725376412393_01_01_org.mp3")
     print(f"From file we recognized: {results}\n")
-
 
     # # # Or use a recognizer without the shortcut, in anyway you would like
     # recognizer = FileRecognizer(arc)

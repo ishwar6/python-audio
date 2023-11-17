@@ -22,7 +22,7 @@ def init(configpath):
         print(f"Cannot open configuration: {str(err)}. Exiting")
         sys.exit(1)
 
-    # create a AudioRecognizer instance
+    # create a AudioRecognizer instance.
     return AudioRecognizer(config)
 
 
@@ -57,7 +57,6 @@ if __name__ == '__main__':
 
     arc = init(config_file)
     if args.fingerprint:
-        # Fingerprint all files in a directory
         if len(args.fingerprint) == 2:
             directory = args.fingerprint[0]
             extension = args.fingerprint[1]
@@ -72,7 +71,6 @@ if __name__ == '__main__':
             arc.fingerprint_file(filepath)
 
     elif args.recognize:
-        # Recognize audio source
         songs = None
         source = args.recognize[0]
         opt_arg = args.recognize[1]

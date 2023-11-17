@@ -138,7 +138,6 @@ class PostgreSQLDatabase(CommonDatabase):
 
     def after_fork(self) -> None:
         # Clear the cursor cache, we don't want any stale connections from
-        # the previous process.
         Cursor.clear_cache()
 
     def insert_song(self, song_name: str, file_hash: str, total_hashes: int) -> int:
@@ -185,7 +184,6 @@ class Cursor(object):
 
         try:
             conn = self._cache.get_nowait()
-            # Ping the connection before using it from the cache.
             conn.ping(True)
         except queue.Empty:
             conn = psycopg2.connect(**options)
@@ -205,14 +203,12 @@ class Cursor(object):
         return self.cursor
 
     def __exit__(self, extype, exvalue, traceback):
-        # if we had a PostgreSQL related error we try to rollback the cursor.
         if extype is psycopg2.DatabaseError:
             self.cursor.rollback()
 
         self.cursor.close()
         self.conn.commit()
 
-        # Put it back on the queue
         try:
             self._cache.put_nowait(self.conn)
         except queue.Full:

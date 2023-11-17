@@ -43,18 +43,14 @@ class AudioRecognizerTest:
         print("length of test files:", len(self.test_files))
         print("lines:", self.n_lines)
 
-        # variable match results (yes, no, invalid)
         self.result_match = [[0 for x in range(self.n_columns)] for x in range(self.n_lines)]
 
         print("result_match matrix:", self.result_match)
 
-        # variable match precision (if matched in the corrected time)
         self.result_matching_times = [[0 for x in range(self.n_columns)] for x in range(self.n_lines)]
 
-        # variable matching time (query time)
         self.result_query_duration = [[0 for x in range(self.n_columns)] for x in range(self.n_lines)]
 
-        # variable confidence
         self.result_match_confidence = [[0 for x in range(self.n_columns)] for x in range(self.n_lines)]
 
         self.begin()
@@ -111,7 +107,6 @@ class AudioRecognizerTest:
             log_msg('--------------------------------------------------')
             log_msg(f'file: {f}')
 
-            # get column
             col = self.get_column_id([x for x in re.findall("[0-9]sec", f) if x in self.test_seconds][0])
 
             # format: XXXX_offset_length.mp3, we also take into account underscores within XXXX
@@ -137,7 +132,6 @@ class AudioRecognizerTest:
                 # we parse the output song back to a json
                 result = json.loads(result.decode('utf-8').replace("'", '"').replace(': b"', ':"'))
 
-                # which song did we predict? We consider only the first match.
                 match = result[RESULTS][0]
                 song_result = match[SONG_NAME]
                 log_msg(f'song: {song}')
@@ -272,14 +266,12 @@ def log_msg(msg, log=True, silent=False):
 
 
 def autolabel(rects, ax):
-    # attach some text labels
     for rect in rects:
         height = rect.get_height()
         ax.text(rect.get_x() + rect.get_width() / 2., 1.05 * height, f'{int(height)}', ha='center', va='bottom')
 
 
 def autolabeldoubles(rects, ax):
-    # attach some text labels
     for rect in rects:
         height = rect.get_height()
         ax.text(rect.get_x() + rect.get_width() / 2., 1.05 * height, f'{round(float(height), 3)}',

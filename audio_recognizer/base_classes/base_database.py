@@ -6,8 +6,7 @@ from audio_recognizer.config.settings import DATABASES
 
 
 class BaseDatabase(object, metaclass=abc.ABCMeta):
-    # Name of your Database subclass, this is used in configuration
-    # to refer to your class
+
     type = None
 
     def __init__(self):
@@ -179,7 +178,7 @@ class BaseDatabase(object, metaclass=abc.ABCMeta):
         pass
 
 
-def get_database(database_type: str = "mysql") -> BaseDatabase:
+def get_database(database_type: str = "postgres") -> BaseDatabase:
     """
     Given a database type it returns a database instance for that type.
 
@@ -193,3 +192,4 @@ def get_database(database_type: str = "mysql") -> BaseDatabase:
         return db_class
     except (ImportError, KeyError):
         raise TypeError("Unsupported database type supplied.")
+
