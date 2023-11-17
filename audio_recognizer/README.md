@@ -7,17 +7,20 @@ AudioRecognizer can memorize audio by listening to it once and fingerprinting it
 Note: for voice recognition, *AudioRecognizer is not the right tool!* AudioRecognizer excels at recognition of exact signals with reasonable amounts of noise.
  
 # build and then run our containers
+```
 $ docker-compose build
 $ docker-compose up -d
-
+```
 # get a shell inside the container
+```
 $ docker-compose run python /bin/bash
 Starting AudioRecognizer_db_1 ... done
 root@f9ea95ce5cea:/code# python example_docker_postgres.py 
 Fingerprinting channel 1/2 for test/woodward_43s.wav
 Fingerprinting channel 1/2 for test/sean_secs.wav
-...
+```
 
+```
 # connect to the database and poke around
 root@f9ea95ce5cea:/code# psql -h db -U postgres AudioRecognizer
 Password for user postgres:  # type "password", as specified in the docker-compose.yml !
