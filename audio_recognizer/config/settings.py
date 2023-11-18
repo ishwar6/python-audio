@@ -25,10 +25,10 @@ Percentage regarding hashes matched vs hashes from the input.
 """
 INPUT_CONFIDENCE = 'input_confidence'
 
-TOTAL_TIME = 'total_time'
-FINGERPRINT_TIME = 'fingerprint_time'
-QUERY_TIME = 'query_time'
-ALIGN_TIME = 'align_time'
+TOTAL_TIME = 'total_processing_time'
+FINGERPRINT_TIME = 'fingerprint_processing_time'
+QUERY_TIME = 'query_processing_time'
+ALIGN_TIME = 'alignment_time'
 OFFSET = 'offset'
 OFFSET_SECS = 'offset_seconds'
 
