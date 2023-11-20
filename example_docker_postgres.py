@@ -9,10 +9,10 @@ from audio_recognizer.logic.recognizer.microphone_recognizer import MicrophoneRe
 # DATABASE CONFIGURATION
 config = {
     "database": {
-        "host": "localhost",
-        "user": "abhi",  
-        "password": "1234",
-        "database": "audio_test_db",
+        "host": "db",
+        "user": "postgres",  
+        "password": "password",
+        "database": "dejavu",
     },
     "database_type": "postgres"
 }
